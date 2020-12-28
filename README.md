@@ -13,5 +13,5 @@
 
 3. Run this command inside the container to execute the tests:
  ```
-  ./vendor/bin/simple-phpunit
+  docker-compose run php ./vendor/bin/simple-phpunit
  ```
