@@ -1,0 +1,163 @@
+swagger: "2.0"
+info:
+  title: API Design Test
+  description: API description.
+  version: 1.0.0
+schemes:
+  - https
+tags:
+- name: "Weather forecast"
+  description: ""  
+paths:
+  /api/v3/city/{id}/weather:
+    get:
+      tags:
+      - "Weather forecast"
+      summary: Get weather forecast of a given city..
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: integer
+          format: "int32"
+          minimum: 1
+          description: >
+           id of the city.
+        - in: query
+          name: from_date
+          type: string
+          format: "date"
+          description: >
+           from date | Use format: YYYY-MM-DD. The start date for the report. Must be used together with `to_date`.
+        - in: query
+          name: to_date
+          type: string
+          format: "date"
+          description: >
+           to date | Use format: YYYY-MM-DD. The end date for the report. Must be used together with `from_date`.
+      responses:
+        200:
+          description: > 
+            If from_date = to_date = null, return the forecast data for given city in today.
+            
+            If have from_date and to_date, return forecast for each day of the given city (which existed in the database) in an array.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 200
+              forecasts:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    forecast:
+                      type: string
+                example:
+                  - date: 2021/01/01
+                    forecast: thunderstorm
+                  - date: 2021/01/02
+                    forecast: cloudy
+                  - date: 2021/01/05
+                    forecast: sunny
+        400:
+          description: >
+            If city with the given Id doesn't exist. Error message: "City cityId doesn't exists".
+            
+            
+            If from_date or to_date = null, then throw error message that they are both required. Error message: "Both From Date and To Date is required, or both can be set to null for today's data".
+            
+            
+            If from_date > to_date, throw error message. Error message: "From Date must be greater or equals to To Date".
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: City cityId doesn't exists.
+    post:
+      tags:
+      - "Weather forecast"
+      summary: Insert/Update weather forecast information of a given city.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: integer
+          format: "int32"
+          minimum: 1
+          description: >
+           id of the city.
+        - in: body  
+          name: forecasts
+          required: true
+          description: >
+           array contains forecasts of each day that we want to insert/update.
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    forecast:
+                      type: string
+                example:
+                  - date: 2021/01/01
+                    forecast: Sunny
+                  - date: 2021/01/02
+                    forecast: Partyly cloudy
+                  - date: 2021/01/05
+                    forecast: Thunderstorm
+      responses:
+        200:
+          description: >
+            Create/Update forecast data for one or more days to the database.
+            
+            Response should show the result of inserting/updating the forecast for each day separately.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 201
+              forecasts:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                    status:
+                      type: string
+                    error:
+                      type: string
+                example:
+                  - date: 2021/01/01
+                    status: inserted
+                  - date: 2021/01/02
+                    status: updated
+                  - date: 2021/01/05
+                    status: failed
+                    error: something wrong
+        400:
+          description: City with the given Id doesn't exist.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: City cityId doesn't exists     
+      
